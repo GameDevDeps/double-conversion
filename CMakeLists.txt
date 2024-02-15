@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.0)
 project(double-conversion VERSION 3.3.0)
 
-option(BUILD_SHARED_LIBS "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" OFF)
-
-if(BUILD_SHARED_LIBS AND MSVC)
-  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-endif()
+#option(BUILD_SHARED_LIBS "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" OFF)
+#
+#if(BUILD_SHARED_LIBS AND MSVC)
+#  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+#endif()
 
 set(headers
     double-conversion/bignum.h
@@ -20,7 +20,7 @@ set(headers
     double-conversion/strtod.h
     double-conversion/utils.h)
 
-add_library(double-conversion
+add_library(double-conversion.double-conversion STATIC
             double-conversion/bignum.cc
             double-conversion/bignum-dtoa.cc
             double-conversion/cached-powers.cc
@@ -31,11 +31,14 @@ add_library(double-conversion
             double-conversion/strtod.cc
             ${headers})
 target_include_directories(
-    double-conversion PUBLIC
+    double-conversion.double-conversion PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+add_library(double-conversion::double-conversion ALIAS double-conversion.double-conversion)
+set_target_properties(double-conversion.double-conversion PROPERTIES
+    EXPORT_NAME double-conversion OUTPUT_NAME double-conversion)
 
 # pick a version #
-set_target_properties(double-conversion PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION 3)
+set_target_properties(double-conversion.double-conversion PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION 3)
 
 # set up testing if requested
 option(BUILD_TESTING "Build test programs" OFF)
@@ -88,7 +91,7 @@ configure_package_config_file(
 #   * header location after install: <prefix>/include/double-conversion/*.h
 #   * headers can be included by C++ code `#include <double-conversion/*.h>`
 install(
-    TARGETS double-conversion
+    TARGETS double-conversion.double-conversion
     EXPORT "${targets_export_name}"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
